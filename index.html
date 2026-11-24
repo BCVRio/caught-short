@@ -343,7 +343,7 @@
   </div>
   <div class="status" id="splashStatus"></div>
   <div class="small" id="arStatus"></div>
-  <div class="small" id="buildTag" style="opacity:.4">Caught Short Festive Edition · Open v1</div>
+  <div class="small" id="buildTag" style="opacity:.4">Caught Short Festive Edition · Open v2</div>
   <p class="small">Uses your camera, location and compass. Loo data from OpenStreetMap. Hours and access change, so double check before it's an emergency.</p>
 </section>
 
@@ -1294,7 +1294,7 @@ function boot(){
   document.addEventListener('pointerdown',e=>{ const b=e.target.closest('button,.row'); if(!b) return; if(b.closest('#startBtn,#demoBtn,#nextBtn,#fartBtn,#listBtn,#miniWrap,#meterBtn,#scoreBtn,#closeHelp,#closeSheet,#closeMap,.filters,#muteBtn,.row,#againBtn')) return; SFX.ui('tap',{rate:0.95+Math.random()*0.1}); },{passive:true});
   $('startBtn').onclick=()=>begin(false);
   $('demoBtn').onclick=()=>begin(true);
-  const openSheet=()=>{ SFX.ui('open'); sortToilets(); renderList(); $('sheet').classList.add('on'); $('sheetScrim').classList.add('on'); };
+  const openSheet=()=>{ SFX.ui('open'); $('sheet').classList.add('on'); $('sheetScrim').classList.add('on'); sortToilets(); renderList(); };
   const closeSheet=()=>{ if($('sheet').classList.contains('on')) SFX.ui('close'); $('sheet').classList.remove('on'); $('sheetScrim').classList.remove('on'); };
   $('refreshBtn').onclick=()=>{ loadToilets(); };
   $('listBtn').onclick=openSheet; $('closeSheet').onclick=closeSheet; $('sheetScrim').onclick=closeSheet;
