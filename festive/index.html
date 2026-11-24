@@ -146,6 +146,10 @@
     .badge.fee{background:#fff1c7;color:#7a5a00}
     .badge.kind{background:#fde2e4;color:#9c1c26}
     .badge.ask{background:#fde2e4;color:#9c1c26}
+    .badge.stale{background:#fff1c7;color:#7a5a00}
+    #goneBtn{pointer-events:auto;background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:800;line-height:1.3}
+    #listFoot{flex:0 0 auto;padding:8px 18px calc(var(--sab) + 12px);font-size:12.5px;color:#4a6b55;font-weight:600;border-top:1px solid #dfeae2;line-height:1.4}
+    #listFoot a{color:#0b7a4b;font-weight:800}
     .row.empty{display:block;text-align:center;padding:26px;color:#4a6b55;font-weight:700}
 
     /* ===== route map ===== */
@@ -340,7 +344,7 @@
   </div>
   <div class="status" id="splashStatus"></div>
   <div class="small" id="arStatus"></div>
-  <div class="small" id="buildTag" style="opacity:.4">Caught Short Festive Edition v21</div>
+  <div class="small" id="buildTag" style="opacity:.4">Caught Short Festive Edition v22</div>
   <p class="small">Uses your camera, location and compass. Loo data from OpenStreetMap. Hours and access change, so double check before it's an emergency.</p>
 </section>
 
@@ -395,6 +399,7 @@
   <header><div><h2>🚻 Nearby loos</h2><p id="sheetSub">Closest first</p></div><div style="display:flex;gap:8px"><button id="refreshBtn" title="Search again here">↻</button><button id="closeSheet">✕</button></div></header>
   <div class="filters"><button data-f="all" class="on">All</button><button data-f="toilets">Public</button><button data-f="pub">Pubs & cafés</button><button data-f="shop">Shops</button><button data-f="civic">Libraries & civic</button><button data-f="free">No fee</button></div>
   <div id="list"></div>
+  <div id="listFoot">Loo data is live from OpenStreetMap. Somewhere closed? Tap <b>Not there?</b> on it, or <a id="osmNote" href="https://www.openstreetmap.org/note/new" target="_blank" rel="noopener">tell OpenStreetMap</a> so it's fixed for everyone.</div>
 </div>
 
 <!-- ===================== ROUTE MAP ===================== -->
@@ -541,6 +546,21 @@ function boot(){
     if(tg.leisure) return "leisure";
     return "other";
   }
+  // ---------- freshness: OSM has no "closed" feed, so drop anything mappers have marked closed and flag anything nobody has touched for years ----------
+  const CLOSED_KEY=/^(disused|abandoned|was|demolished|removed|razed|destroyed|ruins|closed):/;
+  function looksClosed(tg){
+    if(Object.keys(tg).some(k=>CLOSED_KEY.test(k)) && !tg.amenity && !tg.shop && !tg.tourism && !tg.leisure) return true;
+    if(tg.disused==="yes"||tg.abandoned==="yes"||tg.shop==="vacant"||tg.amenity==="vacant") return true;
+    if(/^(off|closed)$/i.test(tg.opening_hours||"")) return true;
+    if(tg.end_date && Date.parse(tg.end_date)<Date.now()) return true;
+    if(/\b(permanently closed|closed down|now closed|\(closed\))\b/i.test([tg.name,tg.note,tg.description].join(" "))) return true;
+    return false;
+  }
+  function checkedOn(tg,ts){ const d=tg.check_date||tg["survey:date"]||tg["check_date:opening_hours"]||tg["source:date"]||ts; const t=Date.parse(d||""); return isNaN(t)?null:t; }
+  const STALE_Y=4; const staleYears=t=>t.checked?(Date.now()-t.checked)/31557600e3:null; const isStale=t=>{ const y=staleYears(t); return y!=null && y>STALE_Y; };
+  const HIDE_KEY='cs_hidden_v1'; let hidden=new Set(); try{ hidden=new Set(JSON.parse(localStorage.getItem(HIDE_KEY)||'[]')); }catch(e){}
+  function hideLoo(t){ hidden.add(t.id); try{ localStorage.setItem(HIDE_KEY,JSON.stringify([...hidden].slice(-200))); }catch(e){} }
+  function freshLabel(t){ const y=staleYears(t); if(y==null) return ''; if(y>STALE_Y) return '⚠️ unchecked since '+new Date(t.checked).getFullYear(); return '✅ checked '+new Date(t.checked).getFullYear(); }
   async function fetchToilets(lat,lon){
     const r=SEARCH_RADIUS;
     // 1) dedicated public toilets  2) any venue that says it has toilets (pubs, cafés, shops, libraries, stations…)
@@ -551,10 +571,11 @@ function boot(){
       `nwr["toilets"="yes"](around:${r},${lat},${lon});`,
       `nwr["toilets:access"~"^(yes|public|customers)$"](around:${r},${lat},${lon});`,
       `nwr["community_toilet_scheme"="yes"](around:${r},${lat},${lon});`,
-      ');out center tags;'].join('');
+      ');out center meta;'].join('');
     const parse=j=>(j.elements||[]).map(e=>{
           const tg=e.tags||{}; const la=e.lat??e.center?.lat, lo=e.lon??e.center?.lon;
           if(la==null) return null;
+          if(looksClosed(tg)) return null;
           const kind=classify(tg);
           const access=(tg["toilets:access"]||tg.access||"").toLowerCase();
           if(["private","no","permit","staff"].includes(access)) return null;
@@ -565,7 +586,7 @@ function boot(){
           return { id:e.type+e.id, name, kind, icon, label, lat:la, lon:lo,
             fee: tg.fee==="yes" || tg["toilets:fee"]==="yes", wheelchair: tg.wheelchair==="yes" || tg["toilets:wheelchair"]==="yes",
             hours: tg.opening_hours || "", unisex: tg.unisex==="yes" || tg["toilets:unisex"]==="yes", baby: tg.changing_table==="yes",
-            customers, scheme: tg.community_toilet_scheme==="yes" };
+            customers, scheme: tg.community_toilet_scheme==="yes", checked: checkedOn(tg, e.timestamp) };
         }).filter(Boolean);
     // race every mirror at once; first good answer wins (7 s cap each)
     let answered=false; const attempts=OVERPASS.map(async url=>{
@@ -592,11 +613,11 @@ function boot(){
         if(r.ok){ answered=true; netFails=0; const j=await r.json(); for(const x of j){
           const tg=x.extratags||{}; const access=(tg['toilets:access']||tg.access||'').toLowerCase();
           if(['private','no','permit','staff'].includes(access)) continue;
-          if(tg.toilets==='no') continue;
+          if(tg.toilets==='no' || looksClosed(tg)) continue;
           const k=(x.type&&KINDS[x.type])?x.type:kind; const [icon,label]=KINDS[k];
           out.push({ id:'nm'+x.osm_type+x.osm_id, name:x.name||label, kind:k, icon, label, lat:+x.lat, lon:+x.lon,
             fee:tg.fee==='yes'||tg['toilets:fee']==='yes', wheelchair:tg.wheelchair==='yes'||tg['toilets:wheelchair']==='yes', hours:tg.opening_hours||'', unisex:tg.unisex==='yes', baby:tg.changing_table==='yes',
-            customers: access==='customers' || (k!=='toilets' && k!=='library' && k!=='station' && k!=='park' && !access), scheme:false, src:'osm' });
+            customers: access==='customers' || (k!=='toilets' && k!=='library' && k!=='station' && k!=='park' && !access), scheme:false, src:'osm', checked:null });
         } }
       }catch(e){ if(e.name!=='AbortError' && ++netFails>=2) break; }
       if(onPartial && out.length) onPartial(out.slice());
@@ -611,13 +632,13 @@ function boot(){
     for(const x of (b||[])){ const bare=String(x.id).replace(/^nm/,''); if(ids.has(bare)) continue;
       if(out.some(y=>distanceM(x,y)<35 && (fw(y.name)===fw(x.name) || (y.kind==='toilets'&&x.kind==='toilets')))) continue;
       ids.add(bare); out.push(x); }
-    return out.filter(x=>distanceM(x,S.pos)<=SEARCH_RADIUS);
+    return out.filter(x=>!hidden.has(x.id) && distanceM(x,S.pos)<=SEARCH_RADIUS);
   }
 
   function sortToilets(){
     if(!S.pos) return;
     S.toilets.forEach(t=>{ t.dist=distanceM(S.pos,t); t.bearing=bearingDeg(S.pos,t); });
-    S.toilets.sort((a,b)=>a.dist-b.dist);
+    S.toilets.sort((a,b)=>(a.dist+(isStale(a)?150:0))-(b.dist+(isStale(b)?150:0)));
   }
 
   let looRetry=null, lastLoadPos=null, loadSeq=0;
@@ -655,6 +676,13 @@ function boot(){
     if(!osm) looRetry=setTimeout(loadToilets,45000);   // OpenStreetMap busy: quietly try again later
   }
 
+  function skipTarget(t){
+    SFX.ui('blip'); hideLoo(t);
+    S.toilets=S.toilets.filter(x=>x.id!==t.id); sortToilets();
+    if(S.toilets.length){ setTarget(S.toilets[0]); toast(`Skipped ${t.name}. We won't show it on this phone again.`,4500); }
+    else { S.target=null; $('tName').textContent="No other loos nearby 😱"; $('tMeta').textContent=""; }
+    renderList();
+  }
   function setTarget(t){
     S.target=t; S.startedAt=Date.now();
     NAV.route=null; NAV.steps=[]; NAV.failed=false; fetchRoute();
@@ -662,7 +690,9 @@ function boot(){
     const bits=[t.icon+" "+t.label+(t.scheme?" · Community Toilet Scheme":"")];
     if(t.customers) bits.push("🙏 ask nicely / buy a drink");
     if(t.wheelchair) bits.push("♿ step free"); if(t.fee) bits.push("💷 fee"); if(t.baby) bits.push("👶 changing"); if(t.hours) bits.push("🕒 "+t.hours);
+    const fl=freshLabel(t); if(fl) bits.push(fl);
     $('tMeta').textContent=bits.join(" · ");
+    const gone=document.createElement('button'); gone.id='goneBtn'; gone.textContent='🚫 Not there?'; gone.onclick=(ev)=>{ ev.stopPropagation(); skipTarget(t); }; $('tMeta').appendChild(gone);
     setQuip(quips[Math.floor(Math.random()*quips.length)]);
     renderList();
     if(navigator.vibrate) navigator.vibrate(30);
@@ -681,7 +711,7 @@ function boot(){
     if(!rows.length) el.innerHTML='<div class="row empty">Nothing of that sort nearby 😬</div>';
     rows.forEach(t=>{
       const row=document.createElement('div'); row.className="row"+(S.target&&t.id===S.target.id?" active":"");
-      row.innerHTML=`<div class="ic">${t.icon||'🚽'}</div><div class="t"><b>${esc(t.name)}</b><span><i class="badge kind">${esc(t.label||'Loo')}</i>${t.customers?'<i class="badge ask">ask</i>':''}${t.scheme?'<i class="badge">CTS</i>':''}${t.wheelchair?'<i class="badge">♿</i>':''}${t.fee?'<i class="badge fee">fee</i>':''}${t.unisex?'<i class="badge">unisex</i>':''}${esc(t.hours||'')}</span></div><div class="d"><b>${fmtDist(t.dist)}</b><small>${t.dist<1000?'METRES':'KM'}</small></div>`;
+      row.innerHTML=`<div class="ic">${t.icon||'🚽'}</div><div class="t"><b>${esc(t.name)}</b><span><i class="badge kind">${esc(t.label||'Loo')}</i>${t.customers?'<i class="badge ask">ask</i>':''}${t.scheme?'<i class="badge">CTS</i>':''}${t.wheelchair?'<i class="badge">♿</i>':''}${t.fee?'<i class="badge fee">fee</i>':''}${t.unisex?'<i class="badge">unisex</i>':''}${isStale(t)?'<i class="badge stale">unchecked '+new Date(t.checked).getFullYear()+'</i>':''}${esc(t.hours||'')}</span></div><div class="d"><b>${fmtDist(t.dist)}</b><small>${t.dist<1000?'METRES':'KM'}</small></div>`;
       row.onclick=()=>{ SFX.ui('blip'); setTarget(t); closeSheet(); };
       el.appendChild(row);
     });
@@ -1274,7 +1304,7 @@ function boot(){
   document.addEventListener('pointerdown',e=>{ const b=e.target.closest('button,.row'); if(!b) return; if(b.closest('#startBtn,#demoBtn,#nextBtn,#fartBtn,#listBtn,#miniWrap,#meterBtn,#scoreBtn,#closeHelp,#closeSheet,#closeMap,.filters,#muteBtn,.row,#againBtn')) return; SFX.ui('tap',{rate:0.95+Math.random()*0.1}); },{passive:true});
   $('startBtn').onclick=()=>begin(false);
   $('demoBtn').onclick=()=>begin(true);
-  const openSheet=()=>{ SFX.ui('open'); $('sheet').classList.add('on'); $('sheetScrim').classList.add('on'); sortToilets(); renderList(); };
+  const openSheet=()=>{ SFX.ui('open'); if(S.pos){ $('osmNote').href=`https://www.openstreetmap.org/note/new#map=19/${S.pos.lat.toFixed(5)}/${S.pos.lon.toFixed(5)}`; } $('sheet').classList.add('on'); $('sheetScrim').classList.add('on'); sortToilets(); renderList(); };
   const closeSheet=()=>{ if($('sheet').classList.contains('on')) SFX.ui('close'); $('sheet').classList.remove('on'); $('sheetScrim').classList.remove('on'); };
   $('refreshBtn').onclick=()=>{ loadToilets(); };
   $('listBtn').onclick=openSheet; $('closeSheet').onclick=closeSheet; $('sheetScrim').onclick=closeSheet;
