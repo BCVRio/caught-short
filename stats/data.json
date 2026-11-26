@@ -1,0 +1,90 @@
+{
+ "generated": "2026-11-26T21:01:25+00:00",
+ "launch": "2026-11-26",
+ "range": {
+  "start": "2026-11-26",
+  "end": "2026-11-26"
+ },
+ "total": {
+  "views": 0,
+  "events": 0,
+  "days": [
+   {
+    "day": "2026-11-26",
+    "views": 0,
+    "hourly": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   }
+  ]
+ },
+ "pages": [],
+ "events": [],
+ "toprefs": [],
+ "locations": [],
+ "systems": [],
+ "browsers": [],
+ "sizes": [
+  {
+   "name": "phone",
+   "id": "phone",
+   "count": 0
+  },
+  {
+   "name": "tablet",
+   "id": "tablet",
+   "count": 0
+  },
+  {
+   "name": "desktop",
+   "id": "desktop",
+   "count": 0
+  },
+  {
+   "name": "desktophd",
+   "id": "desktophd",
+   "count": 0
+  },
+  {
+   "name": "unknown",
+   "id": "unknown",
+   "count": 0
+  }
+ ],
+ "campaigns": [],
+ "funnel": {
+  "views": 0,
+  "start": 0,
+  "first_target": 0,
+  "arrived": 0,
+  "ar_webxr": 0,
+  "ar_camera": 0,
+  "list_open": 0,
+  "map_open": 0,
+  "not_there": 0,
+  "data_unreachable": 0
+ }
+}

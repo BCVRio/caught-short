@@ -1,0 +1,40 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Caught Short · stats</title>
+<style>
+:root{--bg:#0b1020;--card:#151d35;--fg:#f4f6ff;--mute:#9aa6c7;--pop:#ff4f8b;--mint:#2fd48f;--amber:#ffc542}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;padding:20px 16px 40px}
+h1{font-size:22px;margin:0 0 4px}.sub{color:var(--mute);font-size:13px;margin-bottom:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px}
+.tile{background:var(--card);border-radius:14px;padding:14px}.tile b{display:block;font-size:30px;font-weight:900;font-variant-numeric:tabular-nums}.tile span{color:var(--mute);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+h2{font-size:15px;color:var(--mute);margin:18px 0 8px;text-transform:uppercase;letter-spacing:.06em}
+.bars{display:flex;align-items:flex-end;gap:3px;height:120px;background:var(--card);border-radius:14px;padding:12px}
+.bars i{flex:1;background:var(--pop);border-radius:3px 3px 0 0;min-height:2px;position:relative}.bars i:hover::after{content:attr(data-v);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);font-size:11px;color:var(--fg)}
+table{width:100%;border-collapse:collapse;background:var(--card);border-radius:14px;overflow:hidden}td{padding:8px 12px;border-top:1px solid rgba(255,255,255,.06)}td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:800}
+.funnel div{display:grid;grid-template-columns:140px 1fr 60px;gap:10px;align-items:center;margin:6px 0}.funnel i{display:block;height:14px;background:var(--mint);border-radius:7px}.funnel small{color:var(--mute)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+</style></head><body>
+<h1>🚽 Caught Short · live stats</h1><div class="sub" id="gen">Loading…</div>
+<div class="grid" id="tiles"></div>
+<h2>Views per day since launch</h2><div class="bars" id="days"></div>
+<h2>Today by hour</h2><div class="bars" id="hours"></div>
+<h2>Funnel</h2><div class="funnel" id="funnel"></div>
+<div class="cols">
+<div><h2>Where from</h2><table id="refs"></table></div>
+<div><h2>Countries</h2><table id="loc"></table></div>
+<div><h2>Devices</h2><table id="sys"></table></div>
+<div><h2>Events</h2><table id="ev"></table></div>
+</div>
+<script>
+fetch('data.json?'+Date.now()).then(r=>r.json()).then(d=>{
+  const $=id=>document.getElementById(id); const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  $('gen').textContent='Since '+d.launch+' · updated '+new Date(d.generated).toLocaleString('en-GB')+' · refreshes hourly';
+  const f=d.funnel; const todayViews=(d.total.days.at(-1)||{}).views||0;
+  $('tiles').innerHTML=[['Views',f.views],['Today',todayViews],['Started',f.start],['Arrived',f.arrived],['OSM outages',f.data_unreachable]].map(([k,v])=>`<div class="tile"><b>${v}</b><span>${k}</span></div>`).join('');
+  const bars=(el,arr,lab)=>{ const m=Math.max(1,...arr); el.innerHTML=arr.map((v,i)=>`<i style="height:${v/m*100}%" data-v="${lab(i)}: ${v}"></i>`).join(''); };
+  bars($('days'),d.total.days.map(x=>x.views),i=>d.total.days[i].day.slice(5));
+  bars($('hours'),(d.total.days.at(-1)||{hourly:[]}).hourly,i=>i+':00');
+  const steps=[['Views',f.views],['Start tapped',f.start],['First loo targeted',f.first_target],['Arrived',f.arrived]]; const mx=Math.max(1,f.views);
+  $('funnel').innerHTML=steps.map(([k,v])=>`<div><small>${k}</small><i style="width:${v/mx*100}%"></i><b>${v}</b></div>`).join('')+`<div><small>WebXR / camera</small><span>${f.ar_webxr} / ${f.ar_camera}</span><span></span></div><div><small>List / map / not-there</small><span>${f.list_open} / ${f.map_open} / ${f.not_there}</span><span></span></div>`;
+  const tbl=(el,rows)=>{ el.innerHTML=rows.length?rows.map(r=>`<tr><td>${esc(r.name)}</td><td>${r.count}</td></tr>`).join(''):'<tr><td>Nothing yet</td><td>0</td></tr>'; };
+  tbl($('refs'),d.toprefs); tbl($('loc'),d.locations); tbl($('sys'),d.systems); tbl($('ev'),d.events.map(e=>({name:e.title||e.path,count:e.views})));
+}).catch(e=>{ document.getElementById('gen').textContent='Could not load data.json ('+e.message+')'; });
+</script></body></html>
