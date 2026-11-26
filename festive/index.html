@@ -277,6 +277,9 @@
     #confetti{position:fixed;inset:0;z-index:70;pointer-events:none;display:none}
     #confetti.on{display:block}
   </style>
+<script data-goatcounter="https://caughtshort.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script>window.CS_EDITION='festive-zappar';window.track=function(ev,title){try{var g=window.goatcounter;if(g&&g.count){g.count({path:'ev/'+ev,title:title||ev,event:true});}else{(window.__gcq=window.__gcq||[]).push([ev,title]);}}catch(e){}};
+window.addEventListener('load',function(){setTimeout(function(){var q=window.__gcq||[];window.__gcq=[];q.forEach(function(a){window.track(a[0],a[1]);});},1500);});</script>
 </head>
 <body>
 
@@ -344,7 +347,7 @@
   </div>
   <div class="status" id="splashStatus"></div>
   <div class="small" id="arStatus"></div>
-  <div class="small" id="buildTag" style="opacity:.4">Caught Short Festive Edition v22</div>
+  <div class="small" id="buildTag" style="opacity:.4">Caught Short Festive Edition v23</div>
   <p class="small">Uses your camera, location and compass. Loo data from OpenStreetMap. Hours and access change, so double check before it's an emergency.</p>
 </section>
 
@@ -668,22 +671,24 @@ function boot(){
     const live=(osm||nm);
     if(!live && !cached){
       const nearLondon = distanceM(S.pos,{lat:51.5074,lon:-0.1278}) < 30000;
-      if(nearLondon){ applyList(FALLBACK.map((f,i)=>({id:"fb"+i,kind:"toilets",icon:"🚻",label:"Public loo",...f})),{final:true}); toast("Live loo data unreachable right now, showing the emergency list. Retrying…",6000); }
+      if(nearLondon){ applyList(FALLBACK.map((f,i)=>({id:"fb"+i,kind:"toilets",icon:"🚻",label:"Public loo",...f})),{final:true}); track('data-unreachable','Live loo data unreachable'); toast("Live loo data unreachable right now, showing the emergency list. Retrying…",6000); }
       else { $('tName').textContent="Can't reach the loo map yet"; $('tMeta').textContent="Retrying in 20 s…"; toast("The map servers aren't answering. Retrying…",6000); }
       looRetry=setTimeout(loadToilets,20000); return;
     }
-    if(live){ if(!osm && cached) have=mergeLoos(have,cached.filter(c=>!String(c.id).startsWith('nm'))); writeCache(have); applyList(have,{final:true,label:`${have.length} loos found nearby`}); }
+    if(live){ if(!osm && cached) have=mergeLoos(have,cached.filter(c=>!String(c.id).startsWith('nm'))); writeCache(have); track('loos-found-'+(have.length>=20?'20plus':have.length>=10?'10-19':have.length>=5?'5-9':have.length>=1?'1-4':'0'),'Loos found'); applyList(have,{final:true,label:`${have.length} loos found nearby`}); }
     if(!osm) looRetry=setTimeout(loadToilets,45000);   // OpenStreetMap busy: quietly try again later
   }
 
   function skipTarget(t){
-    SFX.ui('blip'); hideLoo(t);
+    SFX.ui('blip'); hideLoo(t); track('not-there','Not there tapped');
     S.toilets=S.toilets.filter(x=>x.id!==t.id); sortToilets();
     if(S.toilets.length){ setTarget(S.toilets[0]); toast(`Skipped ${t.name}. We won't show it on this phone again.`,4500); }
     else { S.target=null; $('tName').textContent="No other loos nearby 😱"; $('tMeta').textContent=""; }
     renderList();
   }
+  let firstTargetTracked=false;
   function setTarget(t){
+    if(!firstTargetTracked){ firstTargetTracked=true; track('first-target','First loo targeted'); }
     S.target=t; S.startedAt=Date.now();
     NAV.route=null; NAV.steps=[]; NAV.failed=false; fetchRoute();
     $('tName').textContent=t.name;
@@ -838,7 +843,7 @@ function boot(){
     });
     return libReady;
   }
-  async function openMap(){ SFX.ui('map');
+  async function openMap(){ SFX.ui('map'); track('map-open','Map opened');
     $('mapSheet').classList.add('on'); $('mapScrim').classList.add('on');
     try{ await loadMapLib(); }catch(e){ $('mapSub').textContent="Map couldn't load (no connection?)"; return; }
     if(!MAP){
@@ -1263,7 +1268,7 @@ function boot(){
 
   let arrived=false;
   function arrive(manual){
-    if(arrived) return; arrived=true;
+    if(arrived) return; arrived=true; track(manual?'arrived-manual':'arrived','Arrived at loo');
     const mins=(Date.now()-S.startedAt)/60000;
     const earned=Math.max(10, Math.round(100 - mins*6 + S.bladder*0.3 + (manual?0:15)));
     S.score+=earned; S.streak+=1; save();
@@ -1285,7 +1290,7 @@ function boot(){
 
   // ---------- flow ----------
   async function begin(demo){
-    S.demo=demo; arrived=false;
+    S.demo=demo; arrived=false; track(demo?'start-demo':'start','Start tapped');
     SFX.unlock(); SFX.ui('start'); if(!titleJinglePlayed){ titleJinglePlayed=true; SFX.jingle(); }
     if(AR && !demo) startCamera(); else if(AR && demo) startCamera();
     setStatus(demo?"Desk mode: pretending you're in Trafalgar Square":"Starting camera, compass and location…");
@@ -1304,7 +1309,7 @@ function boot(){
   document.addEventListener('pointerdown',e=>{ const b=e.target.closest('button,.row'); if(!b) return; if(b.closest('#startBtn,#demoBtn,#nextBtn,#fartBtn,#listBtn,#miniWrap,#meterBtn,#scoreBtn,#closeHelp,#closeSheet,#closeMap,.filters,#muteBtn,.row,#againBtn')) return; SFX.ui('tap',{rate:0.95+Math.random()*0.1}); },{passive:true});
   $('startBtn').onclick=()=>begin(false);
   $('demoBtn').onclick=()=>begin(true);
-  const openSheet=()=>{ SFX.ui('open'); if(S.pos){ $('osmNote').href=`https://www.openstreetmap.org/note/new#map=19/${S.pos.lat.toFixed(5)}/${S.pos.lon.toFixed(5)}`; } $('sheet').classList.add('on'); $('sheetScrim').classList.add('on'); sortToilets(); renderList(); };
+  const openSheet=()=>{ SFX.ui('open'); track('list-open','Loo list opened'); if(S.pos){ $('osmNote').href=`https://www.openstreetmap.org/note/new#map=19/${S.pos.lat.toFixed(5)}/${S.pos.lon.toFixed(5)}`; } $('sheet').classList.add('on'); $('sheetScrim').classList.add('on'); sortToilets(); renderList(); };
   const closeSheet=()=>{ if($('sheet').classList.contains('on')) SFX.ui('close'); $('sheet').classList.remove('on'); $('sheetScrim').classList.remove('on'); };
   $('refreshBtn').onclick=()=>{ loadToilets(); };
   $('listBtn').onclick=openSheet; $('closeSheet').onclick=closeSheet; $('sheetScrim').onclick=closeSheet;
