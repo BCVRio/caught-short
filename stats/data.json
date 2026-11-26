@@ -1,17 +1,17 @@
 {
- "generated": "2026-11-26T21:17:27+00:00",
+ "generated": "2026-11-26T21:17:49+00:00",
  "launch": "2026-11-26",
  "range": {
   "start": "2026-11-26",
   "end": "2026-11-26"
  },
  "total": {
-  "views": 0,
-  "events": 0,
+  "views": 6,
+  "events": 5,
   "days": [
    {
     "day": "2026-11-26",
-    "views": 0,
+    "views": 6,
     "hourly": [
      0,
      0,
@@ -34,16 +34,120 @@
      0,
      0,
      0,
-     0,
+     6,
      0,
      0
     ]
    }
   ]
  },
- "pages": [],
- "events": [],
- "toprefs": [],
+ "pages": [
+  {
+   "path": "/",
+   "title": "Caught Short \u2013 Festive Edition",
+   "views": 1,
+   "visitors": 1,
+   "days": [
+    {
+     "day": "2026-11-26",
+     "views": 1
+    },
+    {
+     "day": "2026-11-27",
+     "views": 0
+    }
+   ]
+  }
+ ],
+ "events": [
+  {
+   "path": "ev/loos-found-20plus",
+   "title": "Loos found",
+   "views": 1,
+   "visitors": 1,
+   "days": [
+    {
+     "day": "2026-11-26",
+     "views": 1
+    },
+    {
+     "day": "2026-11-27",
+     "views": 0
+    }
+   ]
+  },
+  {
+   "path": "ev/list-open",
+   "title": "Loo list opened",
+   "views": 1,
+   "visitors": 1,
+   "days": [
+    {
+     "day": "2026-11-26",
+     "views": 1
+    },
+    {
+     "day": "2026-11-27",
+     "views": 0
+    }
+   ]
+  },
+  {
+   "path": "ev/first-target",
+   "title": "First loo targeted",
+   "views": 1,
+   "visitors": 1,
+   "days": [
+    {
+     "day": "2026-11-26",
+     "views": 1
+    },
+    {
+     "day": "2026-11-27",
+     "views": 0
+    }
+   ]
+  },
+  {
+   "path": "ev/ar-camera",
+   "title": "AR mode: camera feed",
+   "views": 1,
+   "visitors": 1,
+   "days": [
+    {
+     "day": "2026-11-26",
+     "views": 1
+    },
+    {
+     "day": "2026-11-27",
+     "views": 0
+    }
+   ]
+  },
+  {
+   "path": "ev/start",
+   "title": "Start tapped",
+   "views": 1,
+   "visitors": 1,
+   "days": [
+    {
+     "day": "2026-11-26",
+     "views": 1
+    },
+    {
+     "day": "2026-11-27",
+     "views": 0
+    }
+   ]
+  }
+ ],
+ "toprefs": [
+  {
+   "name": "(unknown)",
+   "id": null,
+   "count": 6
+  }
+ ],
  "locations": [
   {
    "name": "United Kingdom",
@@ -94,13 +198,13 @@
  ],
  "campaigns": [],
  "funnel": {
-  "views": 0,
-  "start": 0,
-  "first_target": 0,
+  "views": 6,
+  "start": 1,
+  "first_target": 1,
   "arrived": 0,
   "ar_webxr": 0,
-  "ar_camera": 0,
-  "list_open": 0,
+  "ar_camera": 1,
+  "list_open": 1,
   "map_open": 0,
   "not_there": 0,
   "data_unreachable": 0
