@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-26T21:14:06+00:00",
+ "generated": "2026-11-26T21:17:27+00:00",
  "launch": "2026-11-26",
  "range": {
   "start": "2026-11-26",
@@ -44,14 +44,32 @@
  "pages": [],
  "events": [],
  "toprefs": [],
- "locations": [],
- "systems": [],
- "browsers": [],
+ "locations": [
+  {
+   "name": "United Kingdom",
+   "id": "GB",
+   "count": 6
+  }
+ ],
+ "systems": [
+  {
+   "name": "iOS",
+   "id": "iOS",
+   "count": 6
+  }
+ ],
+ "browsers": [
+  {
+   "name": "Safari",
+   "id": "Safari",
+   "count": 6
+  }
+ ],
  "sizes": [
   {
    "name": "phone",
    "id": "phone",
-   "count": 0
+   "count": 6
   },
   {
    "name": "tablet",
