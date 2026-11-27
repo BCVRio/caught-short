@@ -1,17 +1,17 @@
 {
- "generated": "2026-11-26T21:17:49+00:00",
+ "generated": "2026-11-27T03:38:55+00:00",
  "launch": "2026-11-26",
  "range": {
   "start": "2026-11-26",
-  "end": "2026-11-26"
+  "end": "2026-11-27"
  },
  "total": {
-  "views": 6,
-  "events": 5,
+  "views": 11,
+  "events": 9,
   "days": [
    {
     "day": "2026-11-26",
-    "views": 6,
+    "views": 11,
     "hourly": [
      0,
      0,
@@ -35,6 +35,36 @@
      0,
      0,
      6,
+     5,
+     0
+    ]
+   },
+   {
+    "day": "2026-11-27",
+    "views": 0,
+    "hourly": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
      0,
      0
     ]
@@ -45,6 +75,68 @@
   {
    "path": "/",
    "title": "Caught Short \u2013 Festive Edition",
+   "views": 2,
+   "visitors": 2,
+   "days": [
+    {
+     "day": "2026-11-26",
+     "views": 2
+    },
+    {
+     "day": "2026-11-27",
+     "views": 0
+    },
+    {
+     "day": "2026-11-28",
+     "views": 0
+    }
+   ]
+  }
+ ],
+ "events": [
+  {
+   "path": "ev/loos-found-20plus",
+   "title": "Loos found",
+   "views": 2,
+   "visitors": 2,
+   "days": [
+    {
+     "day": "2026-11-26",
+     "views": 2
+    },
+    {
+     "day": "2026-11-27",
+     "views": 0
+    },
+    {
+     "day": "2026-11-28",
+     "views": 0
+    }
+   ]
+  },
+  {
+   "path": "ev/first-target",
+   "title": "First loo targeted",
+   "views": 2,
+   "visitors": 2,
+   "days": [
+    {
+     "day": "2026-11-26",
+     "views": 2
+    },
+    {
+     "day": "2026-11-27",
+     "views": 0
+    },
+    {
+     "day": "2026-11-28",
+     "views": 0
+    }
+   ]
+  },
+  {
+   "path": "ev/arrived",
+   "title": "Arrived at loo",
    "views": 1,
    "visitors": 1,
    "days": [
@@ -55,14 +147,16 @@
     {
      "day": "2026-11-27",
      "views": 0
+    },
+    {
+     "day": "2026-11-28",
+     "views": 0
     }
    ]
-  }
- ],
- "events": [
+  },
   {
-   "path": "ev/loos-found-20plus",
-   "title": "Loos found",
+   "path": "ev/start-demo",
+   "title": "Start tapped",
    "views": 1,
    "visitors": 1,
    "days": [
@@ -72,6 +166,10 @@
     },
     {
      "day": "2026-11-27",
+     "views": 0
+    },
+    {
+     "day": "2026-11-28",
      "views": 0
     }
    ]
@@ -89,21 +187,9 @@
     {
      "day": "2026-11-27",
      "views": 0
-    }
-   ]
-  },
-  {
-   "path": "ev/first-target",
-   "title": "First loo targeted",
-   "views": 1,
-   "visitors": 1,
-   "days": [
-    {
-     "day": "2026-11-26",
-     "views": 1
     },
     {
-     "day": "2026-11-27",
+     "day": "2026-11-28",
      "views": 0
     }
    ]
@@ -121,6 +207,10 @@
     {
      "day": "2026-11-27",
      "views": 0
+    },
+    {
+     "day": "2026-11-28",
+     "views": 0
     }
    ]
   },
@@ -137,6 +227,10 @@
     {
      "day": "2026-11-27",
      "views": 0
+    },
+    {
+     "day": "2026-11-28",
+     "views": 0
     }
    ]
   }
@@ -146,6 +240,11 @@
    "name": "(unknown)",
    "id": null,
    "count": 6
+  },
+  {
+   "name": "l.instagram.com",
+   "id": "l.instagram.com",
+   "count": 5
   }
  ],
  "locations": [
@@ -153,27 +252,32 @@
    "name": "United Kingdom",
    "id": "GB",
    "count": 6
+  },
+  {
+   "name": "Austria",
+   "id": "AT",
+   "count": 5
   }
  ],
  "systems": [
   {
    "name": "iOS",
    "id": "iOS",
-   "count": 6
+   "count": 11
   }
  ],
  "browsers": [
   {
    "name": "Safari",
    "id": "Safari",
-   "count": 6
+   "count": 11
   }
  ],
  "sizes": [
   {
    "name": "phone",
    "id": "phone",
-   "count": 6
+   "count": 11
   },
   {
    "name": "tablet",
@@ -198,10 +302,10 @@
  ],
  "campaigns": [],
  "funnel": {
-  "views": 6,
-  "start": 1,
-  "first_target": 1,
-  "arrived": 0,
+  "views": 11,
+  "start": 2,
+  "first_target": 2,
+  "arrived": 1,
   "ar_webxr": 0,
   "ar_camera": 1,
   "list_open": 1,
